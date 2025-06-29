@@ -2,11 +2,9 @@ import streamlit as st
 import pandas as pd
 from datetime import datetime, timedelta, date
 
-
 st.set_page_config(page_title="Rotational Shift Scheduler", layout="wide")
 
-st.title("🗓️ Weekly Rotational Shift Scheduler")
-
+st.title("🗓️ Rotational Shift Scheduler with Emergency and Weekly Rotation")
 
 # Agent list
 agents = ["Djelloul", "Nour", "Abdennour", "Iheb"]
@@ -89,43 +87,6 @@ def generate_schedule(start_date_str, num_weeks):
     df = pd.DataFrame(schedule)
     return df
 
-
-# Calculate working hours summary
-def calculate_summary(schedule_df):
-    summary = {agent: {"Working hours": 0, "4 hours/day": 0, "8 hours/day": 0, "OFF": 0} for agent in agents}
-
-    for _, row in schedule_df.iterrows():
-        day = row["Day"]
-
-        if day == "Saturday":
-            for agent in agents:
-                summary[agent]["OFF"] += 1
-            continue
-
-        # Morning shift
-        morning_agents = row["9 AM - 5 PM"].split(", ") if row["9 AM - 5 PM"] != "Emergency" else []
-        for agent in morning_agents:
-            if agent in agents:
-                summary[agent]["Working hours"] += 8
-                summary[agent]["8 hours/day"] += 1
-
-        # Afternoon shift
-        if row["5 PM - 9 PM"] in agents:
-            agent = row["5 PM - 9 PM"]
-            summary[agent]["Working hours"] += 4
-            summary[agent]["4 hours/day"] += 1
-
-        # OFF count
-        off_agents = row["OFF"].split(", ") if row["OFF"] else []
-        for agent in off_agents:
-            if agent in agents:
-                summary[agent]["OFF"] += 1
-
-    df_summary = pd.DataFrame.from_dict(summary, orient="index")
-    df_summary = df_summary.reset_index().rename(columns={"index": "Agent"})
-    return df_summary
-
-
 # Sidebar inputs
 st.sidebar.header("📅 Schedule Settings")
 start_date = st.sidebar.date_input("Start Date", value=datetime.today())
@@ -141,15 +102,10 @@ num_weeks = (days_until_end + 6) // 7  # Round up to full weeks
 # Generate schedule
 if st.sidebar.button("Generate Schedule"):
     schedule_df = generate_schedule(str(start_date), num_weeks)
-    summary_df = calculate_summary(schedule_df)
 
     st.subheader("📋 Generated Shift Schedule")
     st.dataframe(schedule_df, use_container_width=True, hide_index=True)
-
-    st.subheader("📊 Working Hours Summary")
-    st.dataframe(summary_df, use_container_width=True, hide_index=True)
-
-    st.success("✅ Schedule and summary generated successfully!")
+    st.success("✅ Schedule generated successfully!")
 
 else:
     st.info("⬅️ Set the start date and click **Generate Schedule**.")
