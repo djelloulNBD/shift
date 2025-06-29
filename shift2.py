@@ -4,7 +4,7 @@ from datetime import datetime, timedelta, date
 
 st.set_page_config(page_title="Rotational Shift Scheduler", layout="wide")
 
-st.title("🗓️ Rotational Shift Scheduler with Emergency and Weekly Rotation")
+st.title("🗓️ Weekly Rotational Shift Scheduler")
 
 # Agent list
 agents = ["Djelloul", "Nour", "Abdennour", "Iheb"]
